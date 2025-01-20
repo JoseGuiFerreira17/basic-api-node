@@ -11,7 +11,6 @@ export const routes = [
     path: buildRoutePath("/users"),
     handler: (req, res) => {
       const { search } = req.query;
-      console.log(search);
       const users = database.select("users", search ? { name: search, email: search } : null);
       return res.end(JSON.stringify(users));
     },
@@ -52,7 +51,6 @@ export const routes = [
     path: buildRoutePath("/tasks"),
     handler: (req, res) => {
       const { search } = req.query;
-      console.log(search);
       const tasks = database.select(
         "tasks",
         search ? { title: search, description: search } : null
@@ -84,6 +82,44 @@ export const routes = [
     handler: (req, res) => {
       const { id } = req.params;
       database.delete("tasks", id);
+      return res.writeHead(204).end();
+    },
+  },
+  {
+    method: "PUT",
+    path: buildRoutePath("/tasks/:id"),
+    handler: (req, res) => {
+      const { id } = req.params;
+      const { title, description } = req.body;
+      const updated_at = new Date().toISOString();
+
+      const task = database.select("tasks", { id });
+      if (task.length === 0) {
+        return res.writeHead(404).end("Tarefa não encontrada");
+      }
+
+      const updatedData = {
+        title: title || task[0].title,
+        description: description || task[0].description,
+        created_at: task[0].created_at,
+        updated_at: updated_at,
+        completed_at: task[0].completed_at,
+      };
+
+      database.update("tasks", id, updatedData);
+      return res.writeHead(204).end();
+    },
+  },
+  {
+    method: "PATCH",
+    path: buildRoutePath("/tasks/:id/completed"),
+    handler: (req, res) => {
+      const { id } = req.params;
+
+      const completed_at = new Date().toISOString();
+      const updatedData = { completed_at };
+
+      database.partialUpdate("tasks", id, updatedData);
       return res.writeHead(204).end();
     },
   },

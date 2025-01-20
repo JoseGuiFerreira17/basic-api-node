@@ -33,11 +33,17 @@ export class Database {
     let data = this.#dabatabase[table] ?? [];
 
     if (search) {
-      data = data.filter((row) => {
-        return Object.entries(search).some(([key, value]) => {
-          return row[key].toLowerCase().includes(value.toLowerCase());
+      if (search.id) {
+        data = data.filter((row) => {
+          return row.id === search.id;
         });
-      });
+      } else {
+        data = data.filter((row) => {
+          return Object.entries(search).some(([key, value]) => {
+            return row[key].toLowerCase().includes(value.toLowerCase());
+          });
+        });
+      }
     }
 
     return data;
@@ -55,6 +61,15 @@ export class Database {
     const rowIndex = this.#dabatabase[table].findIndex((row) => row.id === id);
     if (rowIndex > -1) {
       this.#dabatabase[table][rowIndex] = { id, ...data };
+      this.#persist();
+    }
+  }
+
+  partialUpdate(table, id, data) {
+    const rowIndex = this.#dabatabase[table].findIndex((row) => row.id === id);
+    if (rowIndex > -1) {
+      const currentData = this.#dabatabase[table][rowIndex];
+      this.#dabatabase[table][rowIndex] = { id, ...currentData, ...data };
       this.#persist();
     }
   }
