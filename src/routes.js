@@ -22,11 +22,13 @@ export const routes = [
       const { name, email } = req.body;
 
       if (!name || !email) {
-        return res.writeHead(422).end("Nome e Email são obrigatórios");
+        return res.writeHead(422).end(JSON.stringify({ message: "Nome e Email são obrigatórios" }));
       }
 
       if (name.length < 3 || email.length < 3) {
-        return res.writeHead(422).end("Nome e Email devem ter pelo menos 3 caracteres");
+        return res
+          .writeHead(422)
+          .end(JSON.stringify({ message: "Nome e Email devem ter pelo menos 3 caracteres" }));
       }
 
       const user = { id: randomUUID(), name: name, email: email };
@@ -39,6 +41,13 @@ export const routes = [
     path: buildRoutePath("/users/:id"),
     handler: (req, res) => {
       const { id } = req.params;
+
+      const [user] = database.select("users", { id });
+
+      if (!user) {
+        return res.writeHead(404).end(JSON.stringify({ message: "Usuário não encontrado." }));
+      }
+
       database.delete("users", id);
       return res.writeHead(204).end();
     },
@@ -56,6 +65,12 @@ export const routes = [
 
       if (name.length < 3 || email.length < 3) {
         return res.writeHead(422).end("Nome e Email devem ter pelo menos 3 caracteres");
+      }
+
+      const [user] = database.select("users", { id });
+
+      if (!user) {
+        return res.writeHead(404).end(JSON.stringify({ message: "Usuário não encontrado" }));
       }
 
       database.update("users", id, { name, email });
@@ -83,11 +98,15 @@ export const routes = [
       const { title, description } = req.body;
 
       if (!title || !description) {
-        return res.writeHead(422).end("Título e Descrição são obrigatórios");
+        return res
+          .writeHead(422)
+          .end(JSON.stringify({ message: "Título e Descrição são obrigatórios" }));
       }
 
       if (title.length < 3 || description.length < 3) {
-        return res.writeHead(422).end("Título e Descrição devem ter pelo menos 3 caracteres");
+        return res
+          .writeHead(422)
+          .end(JSON.stringify({ message: "Título e Descrição devem ter pelo menos 3 caracteres" }));
       }
 
       const created_at = new Date().toISOString();
@@ -96,7 +115,7 @@ export const routes = [
         title: title,
         description: description,
         created_at: created_at,
-        updated_at: null,
+        updated_at: created_at,
         completed_at: null,
       };
       database.insert("tasks", task);
@@ -108,6 +127,13 @@ export const routes = [
     path: buildRoutePath("/tasks/:id"),
     handler: (req, res) => {
       const { id } = req.params;
+
+      const [task] = database.select("tasks", { id });
+
+      if (!task) {
+        return res.writeHead(404).end(JSON.stringify({ message: "Tarefa não encontrada" }));
+      }
+
       database.delete("tasks", id);
       return res.writeHead(204).end();
     },
@@ -129,20 +155,17 @@ export const routes = [
 
       const updated_at = new Date().toISOString();
 
-      const task = database.select("tasks", { id });
-      if (task.length === 0) {
-        return res.writeHead(404).end("Tarefa não encontrada");
+      const [task] = database.select("tasks", { id });
+
+      if (!task) {
+        return res.writeHead(404).end(JSON.stringify({ message: "Tarefa não encontrada" }));
       }
 
-      const updatedData = {
-        title: title || task[0].title,
-        description: description || task[0].description,
-        created_at: task[0].created_at,
-        updated_at: updated_at,
-        completed_at: task[0].completed_at,
-      };
-
-      database.update("tasks", id, updatedData);
+      database.update("tasks", id, {
+        title: title ?? task.title,
+        description: description ?? task.description,
+        updated_at,
+      });
       return res.writeHead(204).end();
     },
   },
@@ -152,10 +175,16 @@ export const routes = [
     handler: (req, res) => {
       const { id } = req.params;
 
-      const completed_at = new Date().toISOString();
-      const updatedData = { completed_at };
+      const [task] = database.select("tasks", { id });
 
-      database.partialUpdate("tasks", id, updatedData);
+      if (!task) {
+        return res.writeHead(404).end(JSON.stringify({ message: "Tarefa não encontrada" }));
+      }
+
+      const isCompleted = task.completed_at !== null;
+      const completed_at = isCompleted ? null : new Date().toISOString();
+
+      database.update("tasks", id, { completed_at });
       return res.writeHead(204).end();
     },
   },
