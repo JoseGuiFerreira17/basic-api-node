@@ -20,6 +20,15 @@ export const routes = [
     path: buildRoutePath("/users"),
     handler: (req, res) => {
       const { name, email } = req.body;
+
+      if (!name || !email) {
+        return res.writeHead(422).end("Nome e Email são obrigatórios");
+      }
+
+      if (name.length < 3 || email.length < 3) {
+        return res.writeHead(422).end("Nome e Email devem ter pelo menos 3 caracteres");
+      }
+
       const user = { id: randomUUID(), name: name, email: email };
       database.insert("users", user);
       return res.writeHead(201).end();
@@ -40,6 +49,15 @@ export const routes = [
     handler: (req, res) => {
       const { id } = req.params;
       const { name, email } = req.body;
+
+      if (!name || !email) {
+        return res.writeHead(422).end("Nome e Email são obrigatórios");
+      }
+
+      if (name.length < 3 || email.length < 3) {
+        return res.writeHead(422).end("Nome e Email devem ter pelo menos 3 caracteres");
+      }
+
       database.update("users", id, { name, email });
       return res.writeHead(204).end();
     },
@@ -63,6 +81,15 @@ export const routes = [
     path: buildRoutePath("/tasks"),
     handler: (req, res) => {
       const { title, description } = req.body;
+
+      if (!title || !description) {
+        return res.writeHead(422).end("Título e Descrição são obrigatórios");
+      }
+
+      if (title.length < 3 || description.length < 3) {
+        return res.writeHead(422).end("Título e Descrição devem ter pelo menos 3 caracteres");
+      }
+
       const created_at = new Date().toISOString();
       const task = {
         id: randomUUID(),
@@ -91,6 +118,15 @@ export const routes = [
     handler: (req, res) => {
       const { id } = req.params;
       const { title, description } = req.body;
+
+      if (!title || !description) {
+        return res.writeHead(422).end("Título e Descrição são obrigatórios");
+      }
+
+      if (title.length < 3 || description.length < 3) {
+        return res.writeHead(422).end("Título e Descrição devem ter pelo menos 3 caracteres");
+      }
+
       const updated_at = new Date().toISOString();
 
       const task = database.select("tasks", { id });
