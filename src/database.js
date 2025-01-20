@@ -32,4 +32,12 @@ export class Database {
   select(table) {
     return this.#dabatabase[table] ?? [];
   }
+
+  delete(table, id) {
+    const rowIndex = this.#dabatabase[table].findIndex((row) => row.id === id);
+    if (rowIndex > -1) {
+      this.#dabatabase[table].splice(rowIndex, 1);
+      this.#persist();
+    }
+  }
 }
