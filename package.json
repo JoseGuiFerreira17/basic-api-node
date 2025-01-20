@@ -1,0 +1,21 @@
+{
+  "name": "basic-api",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch src/server.js "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JoseGuiFerreira17/basic-api-node.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JoseGuiFerreira17/basic-api-node/issues"
+  },
+  "homepage": "https://github.com/JoseGuiFerreira17/basic-api-node#readme",
+  "description": ""
+}
