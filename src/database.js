@@ -18,4 +18,18 @@ export class Database {
   #persist() {
     fs.writeFile(databasePath, JSON.stringify(this.#dabatabase));
   }
+
+  insert(table, data) {
+    if (Array.isArray(this.#dabatabase[table])) {
+      this.#dabatabase[table].push(data);
+    } else {
+      this.#dabatabase[table] = [data];
+    }
+    this.#persist();
+    return data;
+  }
+
+  select(table) {
+    return this.#dabatabase[table] ?? [];
+  }
 }
